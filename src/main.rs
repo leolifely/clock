@@ -16,7 +16,7 @@ fn main() {
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
 
-    let mut window = video_subsystem.window("Clock", 640, 480)
+    let window = video_subsystem.window("Clock", 640, 480)
         .position_centered()
         .resizable()
         .build()
