@@ -4,9 +4,11 @@ mod os_logo;
 extern crate sdl2;
 extern crate chrono;
 
+use sdl2::image::LoadTexture;
 use sdl2::pixels::Color;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
+use sdl2::rect::Rect;
 use sdl2::render::TextureQuery;
 use sdl2::video::FullscreenType;
 
@@ -38,6 +40,15 @@ fn main() {
     let mut is_fullscreen = false;
 
     let os_logo_path = os_logo::get_distro_logo_path();
+    let texture_creator = canvas.texture_creator();
+    let logo_texture = match texture_creator.load_texture(Path::new(&os_logo_path)) {
+        Ok(texture) => texture,
+        Err(e) => {
+            eprintln!("Could not load logo texture: {}", e);
+            return;
+        }
+    };
+    let (mut window_width, mut window_height) = canvas.output_size().unwrap();
 
     'running: loop {
         for event in event_pump.poll_iter() {
@@ -58,51 +69,56 @@ fn main() {
                 _ => {},
             }
         }
-        canvas.clear();
+        
+        
+
         let now = Local::now();
-        let (width, height) = canvas.output_size().unwrap();
-        draw_time(now.format("%H:%M:%S").to_string(), &mut canvas, &ttf_context, width as i32, height as i32);
-        os_logo::draw_logo(os_logo_path.as_str(), &mut canvas, width as i32, height as i32);
+       // if window_width != canvas.output_size().unwrap().0 {
+            println!("Showing logo");
+            (window_width, window_height) = canvas.output_size().unwrap();
+            let TextureQuery { width, height, .. } = logo_texture.query();
+            let scale_factor = (window_width as f32 / 4.0) / width as f32;
+            let new_width = (width as f32 * scale_factor) as u32;
+            let new_height = (height as f32 * scale_factor) as u32;
+        
+            let target = sdl2::rect::Rect::new(
+                0,//(window_width as i32 - new_width as i32) / 2,
+                0,//(window_height as i32- new_height as i32) / 2 + (height / 4) as i32,
+                new_width,
+                new_height
+            );
+            if let Err(e) = canvas.copy(&logo_texture, None, Some(target)) {
+                eprintln!("Could not copy logo texture to canvas: {}", e);
+            }
+        //}
+
+        let time_rect = draw_time(now.format("%H:%M:%S").to_string(), &mut canvas, &ttf_context, window_width as i32, window_height as i32);
+        
+    
+        
         canvas.present();
 
-        // Delay to control the frame rate
         ::std::thread::sleep(Duration::from_millis(1000 / 60));
+        canvas.fill_rect(time_rect).unwrap();
+        println!("{},{}", time_rect.width(), time_rect.height());
     }
 }
 
-fn draw_time(time: String, canvas: &mut sdl2::render::Canvas<sdl2::video::Window>, ttf_context: &sdl2::ttf::Sdl2TtfContext, window_width: i32, window_height: i32) {
-    // Ensure the font path is correct
+fn draw_time(time: String, canvas: &mut sdl2::render::Canvas<sdl2::video::Window>, ttf_context: &sdl2::ttf::Sdl2TtfContext, window_width: i32, window_height: i32) -> Rect{
+
     let font_path: &Path = Path::new("fonts/DMMono-Regular.ttf");
     
     // Load the font
     let font_size = (window_width / 5) as u16;
-    let font = match ttf_context.load_font(font_path, font_size) {
-        Ok(font) => font,
-        Err(e) => {
-            eprintln!("Could not load font: {}", e);
-            return;
-        }
-    };
+    let font = ttf_context.load_font(font_path, font_size).unwrap();
 
     // Render the text to a surface
-    let surface = match font.render(&time)
-        .blended(sdl2::pixels::Color::RGBA(255, 255, 255, 255)) {
-        Ok(surface) => surface,
-        Err(e) => {
-            eprintln!("Could not render text to surface: {}", e);
-            return;
-        }
-    };
+    let surface = font.render(&time)
+        .blended(sdl2::pixels::Color::RGBA(255, 255, 255, 255)).unwrap();
 
     // Create a texture from the surface
     let texture_creator = canvas.texture_creator();
-    let texture = match texture_creator.create_texture_from_surface(&surface) {
-        Ok(texture) => texture,
-        Err(e) => {
-            eprintln!("Could not create texture from surface: {}", e);
-            return;
-        }
-    };
+    let texture = texture_creator.create_texture_from_surface(&surface).unwrap();
 
     // Determine the text's width and height
     let TextureQuery { width, height, .. } = texture.query();
@@ -119,4 +135,5 @@ fn draw_time(time: String, canvas: &mut sdl2::render::Canvas<sdl2::video::Window
     if let Err(e) = canvas.copy(&texture, None, Some(target)) {
         eprintln!("Could not copy texture to canvas: {}", e);
     }
+    target
 }
