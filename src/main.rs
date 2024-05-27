@@ -1,3 +1,6 @@
+mod os_logo;
+
+
 extern crate sdl2;
 extern crate chrono;
 
@@ -34,6 +37,8 @@ fn main() {
 
     let mut is_fullscreen = false;
 
+    let os_logo_path = os_logo::get_distro_logo_path();
+
     'running: loop {
         for event in event_pump.poll_iter() {
             match event {
@@ -57,6 +62,7 @@ fn main() {
         let now = Local::now();
         let (width, height) = canvas.output_size().unwrap();
         draw_time(now.format("%H:%M:%S").to_string(), &mut canvas, &ttf_context, width as i32, height as i32);
+        os_logo::draw_logo(os_logo_path.as_str(), &mut canvas, width as i32, height as i32);
         canvas.present();
 
         // Delay to control the frame rate
