@@ -73,24 +73,10 @@ fn main() {
         
 
         let now = Local::now();
-       // if window_width != canvas.output_size().unwrap().0 {
-            println!("Showing logo");
+        if (window_width, window_height) != canvas.output_size().unwrap() {
             (window_width, window_height) = canvas.output_size().unwrap();
-            let TextureQuery { width, height, .. } = logo_texture.query();
-            let scale_factor = (window_width as f32 / 4.0) / width as f32;
-            let new_width = (width as f32 * scale_factor) as u32;
-            let new_height = (height as f32 * scale_factor) as u32;
-        
-            let target = sdl2::rect::Rect::new(
-                0,//(window_width as i32 - new_width as i32) / 2,
-                0,//(window_height as i32- new_height as i32) / 2 + (height / 4) as i32,
-                new_width,
-                new_height
-            );
-            if let Err(e) = canvas.copy(&logo_texture, None, Some(target)) {
-                eprintln!("Could not copy logo texture to canvas: {}", e);
-            }
-        //}
+            os_logo::draw_logo(&logo_texture, &mut canvas)
+        }
 
         let time_rect = draw_time(now.format("%H:%M:%S").to_string(), &mut canvas, &ttf_context, window_width as i32, window_height as i32);
         
