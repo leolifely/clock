@@ -89,7 +89,7 @@ fn main() {
 
 fn draw_time(time: String, canvas: &mut sdl2::render::Canvas<sdl2::video::Window>, ttf_context: &sdl2::ttf::Sdl2TtfContext, window_width: i32, window_height: i32) {
 
-    let font_path: &Path = Path::new("fonts/DMMono-Regular.ttf");
+    let font_path: &Path = Path::new("assets/DMMono-Regular.ttf");
     
     // Load the font
     let font_size = (window_width / 5) as u16;
