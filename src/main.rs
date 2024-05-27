@@ -8,7 +8,6 @@ use sdl2::image::LoadTexture;
 use sdl2::pixels::Color;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-use sdl2::rect::Rect;
 use sdl2::render::TextureQuery;
 use sdl2::video::FullscreenType;
 
@@ -48,9 +47,11 @@ fn main() {
             return;
         }
     };
-    let (mut window_width, mut window_height) = canvas.output_size().unwrap();
+
+    os_logo::draw_logo(&logo_texture, &mut canvas);
 
     'running: loop {
+        canvas.clear();
         for event in event_pump.poll_iter() {
             match event {
                 Event::Quit {..} |
@@ -73,24 +74,20 @@ fn main() {
         
 
         let now = Local::now();
-        if (window_width, window_height) != canvas.output_size().unwrap() {
-            (window_width, window_height) = canvas.output_size().unwrap();
-            os_logo::draw_logo(&logo_texture, &mut canvas)
-        }
-
-        let time_rect = draw_time(now.format("%H:%M:%S").to_string(), &mut canvas, &ttf_context, window_width as i32, window_height as i32);
+        
+        os_logo::draw_logo(&logo_texture, &mut canvas);
+        let (window_width, window_height) = canvas.output_size().unwrap();
+        draw_time(now.format("%H:%M:%S").to_string(), &mut canvas, &ttf_context, window_width as i32, window_height as i32);
         
     
         
         canvas.present();
 
         ::std::thread::sleep(Duration::from_millis(1000 / 60));
-        canvas.fill_rect(time_rect).unwrap();
-        println!("{},{}", time_rect.width(), time_rect.height());
     }
 }
 
-fn draw_time(time: String, canvas: &mut sdl2::render::Canvas<sdl2::video::Window>, ttf_context: &sdl2::ttf::Sdl2TtfContext, window_width: i32, window_height: i32) -> Rect{
+fn draw_time(time: String, canvas: &mut sdl2::render::Canvas<sdl2::video::Window>, ttf_context: &sdl2::ttf::Sdl2TtfContext, window_width: i32, window_height: i32) {
 
     let font_path: &Path = Path::new("fonts/DMMono-Regular.ttf");
     
@@ -121,5 +118,4 @@ fn draw_time(time: String, canvas: &mut sdl2::render::Canvas<sdl2::video::Window
     if let Err(e) = canvas.copy(&texture, None, Some(target)) {
         eprintln!("Could not copy texture to canvas: {}", e);
     }
-    target
 }
