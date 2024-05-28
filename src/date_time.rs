@@ -50,7 +50,7 @@ pub fn draw_date(date: String, canvas: &mut sdl2::render::Canvas<sdl2::video::Wi
     
     let target = sdl2::rect::Rect::new(
         (window_width - width as i32) / 2, 
-        ((window_height - height as i32) / 2) + window_height / 4, 
+        window_height - height as i32,
         width, 
         height);
     
