@@ -1,5 +1,5 @@
 mod os_logo;
-
+mod date_time;
 
 extern crate sdl2;
 extern crate chrono;
@@ -8,7 +8,6 @@ use sdl2::image::LoadTexture;
 use sdl2::pixels::Color;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-use sdl2::render::TextureQuery;
 use sdl2::video::FullscreenType;
 
 use std::path::Path;
@@ -77,7 +76,7 @@ fn main() {
         
         os_logo::draw_logo(&logo_texture, &mut canvas);
         let (window_width, window_height) = canvas.output_size().unwrap();
-        draw_time(now.format("%H:%M:%S").to_string(), &mut canvas, &ttf_context, window_width as i32, window_height as i32);
+        date_time::draw_time(now.format("%H:%M:%S").to_string(), &mut canvas, &ttf_context, window_width as i32, window_height as i32);
         
     
         
@@ -87,35 +86,3 @@ fn main() {
     }
 }
 
-fn draw_time(time: String, canvas: &mut sdl2::render::Canvas<sdl2::video::Window>, ttf_context: &sdl2::ttf::Sdl2TtfContext, window_width: i32, window_height: i32) {
-
-    let font_path: &Path = Path::new("assets/DMMono-Regular.ttf");
-    
-    // Load the font
-    let font_size = (window_width / 5) as u16;
-    let font = ttf_context.load_font(font_path, font_size).unwrap();
-
-    // Render the text to a surface
-    let surface = font.render(&time)
-        .blended(sdl2::pixels::Color::RGBA(255, 255, 255, 255)).unwrap();
-
-    // Create a texture from the surface
-    let texture_creator = canvas.texture_creator();
-    let texture = texture_creator.create_texture_from_surface(&surface).unwrap();
-
-    // Determine the text's width and height
-    let TextureQuery { width, height, .. } = texture.query();
-
-    // Define the destination rectangle and center it
-    let target = sdl2::rect::Rect::new(
-        (window_width - width as i32) / 2,
-        (window_height - height as i32) / 2,
-        width,
-        height
-    );
-
-    // Copy the texture to the canvas
-    if let Err(e) = canvas.copy(&texture, None, Some(target)) {
-        eprintln!("Could not copy texture to canvas: {}", e);
-    }
-}
