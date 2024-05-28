@@ -13,7 +13,7 @@ use sdl2::video::FullscreenType;
 use std::path::Path;
 use std::time::Duration;
 
-use chrono::Local;
+use chrono::{Local, Timelike};
 
 fn main() {
     let sdl_context = sdl2::init().unwrap();
@@ -48,9 +48,11 @@ fn main() {
     };
 
     os_logo::draw_logo(&logo_texture, &mut canvas);
+    let mut now = Local::now();
+    let mut second = now.second();
+    let (mut window_width, mut window_height) = canvas.output_size().unwrap();
 
     'running: loop {
-        canvas.clear();
         for event in event_pump.poll_iter() {
             match event {
                 Event::Quit {..} |
@@ -72,13 +74,16 @@ fn main() {
         
         
 
-        let now = Local::now();
+        now = Local::now();
         
-        os_logo::draw_logo(&logo_texture, &mut canvas);
-        let (window_width, window_height) = canvas.output_size().unwrap();
-        date_time::draw_time(now.format("%H:%M:%S").to_string(), &mut canvas, &ttf_context, window_width as i32, window_height as i32);
-        date_time::draw_date(now.format("%Y-%m-%d").to_string(), &mut canvas, &ttf_context, window_width as i32, window_height as i32);
-    
+        if second != now.second() || (window_width, window_height) != canvas.output_size().unwrap() {
+            canvas.clear();
+            second = now.second();
+            os_logo::draw_logo(&logo_texture, &mut canvas);
+            (window_width, window_height) = canvas.output_size().unwrap();
+            date_time::draw_time(now.format("%H:%M:%S").to_string(), &mut canvas, &ttf_context, window_width as i32, window_height as i32);
+            date_time::draw_date(now.format("%Y-%m-%d").to_string(), &mut canvas, &ttf_context, window_width as i32, window_height as i32);
+        }
         
         canvas.present();
 
