@@ -77,7 +77,7 @@ fn main() {
         os_logo::draw_logo(&logo_texture, &mut canvas);
         let (window_width, window_height) = canvas.output_size().unwrap();
         date_time::draw_time(now.format("%H:%M:%S").to_string(), &mut canvas, &ttf_context, window_width as i32, window_height as i32);
-        
+        date_time::draw_date(now.format("%Y-%m-%d").to_string(), &mut canvas, &ttf_context, window_width as i32, window_height as i32);
     
         
         canvas.present();
