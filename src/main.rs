@@ -10,7 +10,6 @@ use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::video::FullscreenType;
 
-use std::path::Path;
 use std::time::Duration;
 
 use chrono::{Local, Timelike};
@@ -37,9 +36,9 @@ fn main() {
 
     let mut is_fullscreen = false;
 
-    let os_logo_path = os_logo::get_distro_logo_path();
+    let os_logo = os_logo::get_distro_logo_path();
     let texture_creator = canvas.texture_creator();
-    let logo_texture = match texture_creator.load_texture(Path::new(&os_logo_path)) {
+    let logo_texture = match texture_creator.load_texture_bytes(&os_logo) {
         Ok(texture) => texture,
         Err(e) => {
             eprintln!("Could not load logo texture: {}", e);

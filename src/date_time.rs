@@ -1,14 +1,12 @@
-use std::path::Path;
-
 use sdl2::render::TextureQuery;
 
 pub fn draw_time(time: String, canvas: &mut sdl2::render::Canvas<sdl2::video::Window>, ttf_context: &sdl2::ttf::Sdl2TtfContext, window_width: i32, window_height: i32) {
 
-    let font_path: &Path = Path::new("assets/DMMono-Regular.ttf");
+    let font_raw = include_bytes!("assets/DMMono-Regular.ttf");
     
     // Load the font
     let font_size = (window_width / 5) as u16;
-    let font = ttf_context.load_font(font_path, font_size).unwrap();
+    let font = ttf_context.load_font_from_rwops(sdl2::rwops::RWops::from_bytes(font_raw).unwrap(), font_size).unwrap();
 
     // Render the text to a surface
     let surface = font.render(&time)
@@ -36,10 +34,9 @@ pub fn draw_time(time: String, canvas: &mut sdl2::render::Canvas<sdl2::video::Wi
 }
 
 pub fn draw_date(date: String, canvas: &mut sdl2::render::Canvas<sdl2::video::Window>, ttf_context: &sdl2::ttf::Sdl2TtfContext, window_width: i32, window_height: i32) {
-    let font_path: &Path = Path::new("assets/DMMono-Regular.ttf");
+    let font_raw = include_bytes!("assets/DMMono-Regular.ttf");
     let font_size = (window_width / 16) as u16;
-    let font = ttf_context.load_font(font_path, font_size).unwrap();
-    
+    let font = ttf_context.load_font_from_rwops(sdl2::rwops::RWops::from_bytes(font_raw).unwrap(), font_size).unwrap();    
     let surface = font .render(&date)
         .blended(sdl2::pixels::Color::RGBA(50, 200, 50, 255)).unwrap();
 
